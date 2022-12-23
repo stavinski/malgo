@@ -24,7 +24,7 @@ var (
 
 	// TODO: make these internal and expose a proper func for each
 	ProcWlanOpenHandle     = modWlanapi.NewProc("WlanOpenHandle")
-	ProcWlanCloseHandle    = modWlanapi.NewProc("procWlanCloseHandle")
+	ProcWlanCloseHandle    = modWlanapi.NewProc("WlanCloseHandle")
 	ProcWlanEnumInterfaces = modWlanapi.NewProc("WlanEnumInterfaces")
 	ProcWlanFreeMemory     = modWlanapi.NewProc("WlanFreeMemory")
 	ProcWlanGetProfileList = modWlanapi.NewProc("WlanGetProfileList")
@@ -55,7 +55,7 @@ type WLAN_INTERFACE_INFO struct {
 
 type WLAN_INTERFACE_INFO_LIST struct {
 	NumberOfItems, Index uint32
-	InterfaceInfo        [64]WLAN_INTERFACE_INFO
+	InterfaceInfo        *WLAN_INTERFACE_INFO
 }
 
 func UTF16PtrToString(p *uint16) string {
