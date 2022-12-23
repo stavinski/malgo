@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
 	"os"
 	"unsafe"
@@ -14,7 +15,20 @@ import (
 
 // XML marshal type for a WLAN profile
 type ProfileXML struct {
-	// TBC
+	XMLName    xml.Name `xml:"WLANProfile"`
+	Name       string   `xml:"name"`
+	SSIDConfig struct {
+		SSID struct {
+			Name string `xml:"name"`
+		} `xml:"SSID"`
+	} `xml:"SSIDConfig"`
+	MSM struct {
+		Security struct {
+			SharedKey struct {
+				KeyMaterial string `xml:"keyMaterial"`
+			} `xml:"sharedKey"`
+		} `xml:"security"`
+	} `xml:"MSM"`
 }
 
 func main() {
@@ -48,47 +62,55 @@ func main() {
 	}
 	// release interfaces memory at the end of the func
 	defer win32.ProcWlanFreeMemory.Call(uintptr(unsafe.Pointer(interfaces)))
+	ifaces := (*[1 << 30]win32.WLAN_INTERFACE_INFO)(unsafe.Pointer(&interfaces.InterfaceInfo[0]))[:interfaces.NumberOfItems:interfaces.NumberOfItems]
+	// fmt.Printf("%v ifaces found.\n", interfaces.NumberOfItems)
 
-	fmt.Printf("%v ifaces found.\n", interfaces.NumberOfItems)
+	for _, iface := range ifaces {
+		var profList *win32.WLAN_PROFILE_INFO_LIST
+		res, _, err = win32.ProcWlanGetProfileList.Call(wlanHandle,
+			uintptr(unsafe.Pointer(&iface.InterfaceGUID)),
+			win32.NULL,
+			uintptr(unsafe.Pointer(&profList)))
+		if res != win32.ERROR_SUCCESS {
+			fmt.Fprint(os.Stderr, err.Error())
+			return
+		}
 
-	// for i := uint32(0); i < interfaces.NumberOfItems; i++ {
-	// 	var profList *win32.WLAN_PROFILE_INFO_LIST
-	// 	iface := interfaces.InterfaceInfo[i]
-	// 	res, _, err = win32.ProcWlanGetProfileList.Call(wlanHandle,
-	// 		uintptr(unsafe.Pointer(&iface.InterfaceGUID)),
-	// 		win32.NULL,
-	// 		uintptr(unsafe.Pointer(&profList)))
-	// 	if res != win32.ERROR_SUCCESS {
-	// 		fmt.Fprint(os.Stderr, err.Error())
-	// 		return
-	// 	}
+		if profList.NumberOfItems == 0 {
+			continue
+		}
 
-	// 	for j := uint32(0); j < profList.NumberOfItems; j++ {
-	// 		var profXMLPtr uintptr
-	// 		profListEntry := profList.ProfileInfo[j]
-	// 		fmt.Printf("Profile: %v\n", syscall.UTF16ToString(profListEntry.ProfileName[:]))
-	// 		flags := win32.WLAN_PROFILE_GET_PLAINTEXT_KEY
-	// 		res, _, err = win32.ProcWlanGetProfile.Call(wlanHandle,
-	// 			uintptr(unsafe.Pointer(&iface.InterfaceGUID)),
-	// 			uintptr(unsafe.Pointer(&profListEntry.ProfileName)),
-	// 			win32.NULL,
-	// 			profXMLPtr,
-	// 			uintptr(unsafe.Pointer(&flags)),
-	// 			win32.NULL)
-	// 		if res != win32.ERROR_SUCCESS {
-	// 			fmt.Fprint(os.Stderr, err.Error())
-	// 			return
-	// 		}
+		fmt.Printf("[+] found %v profiles for current interface\n", profList.NumberOfItems)
+		fmt.Println("[+] retrieving WLAN profiles creds...")
+		profiles := (*[1 << 30]win32.WLAN_PROFILE_INFO)(unsafe.Pointer(&profList.ProfileInfo[0]))[:profList.NumberOfItems:profList.NumberOfItems]
+		for _, profile := range profiles {
+			var profXMLPtr *uint16
+			var xmlData ProfileXML
 
-	// 		profXML := win32.UTF16PtrToString((*uint16)(unsafe.Pointer(profXMLPtr)))
-	// 		fmt.Println(profXML)
+			flags := win32.WLAN_PROFILE_GET_PLAINTEXT_KEY
+			access := uint32(0)
+			res, _, err = win32.ProcWlanGetProfile.Call(wlanHandle,
+				uintptr(unsafe.Pointer(&iface.InterfaceGUID)),
+				uintptr(unsafe.Pointer(&profile.ProfileName)),
+				win32.NULL,
+				uintptr(unsafe.Pointer(&profXMLPtr)),
+				uintptr(unsafe.Pointer(&flags)),
+				uintptr(unsafe.Pointer(&access)))
+			if res != win32.ERROR_SUCCESS {
+				fmt.Fprint(os.Stderr, err.Error())
+				return
+			}
+			profXML := win32.UTF16PtrToString((*uint16)(unsafe.Pointer(profXMLPtr)))
+			err = xml.Unmarshal([]byte(profXML), &xmlData)
+			if err == nil {
+				fmt.Printf("\t%v => %v\n", xmlData.SSIDConfig.SSID.Name, xmlData.MSM.Security.SharedKey.KeyMaterial)
+			}
 
-	// 		// release XML string memory
-	// 		win32.ProcWlanFreeMemory.Call(profXMLPtr)
-	// 	}
+			// release XML string memory
+			win32.ProcWlanFreeMemory.Call(uintptr(unsafe.Pointer(profXMLPtr)))
+		}
 
-	// 	// release profList memory
-	// 	win32.ProcWlanFreeMemory.Call(uintptr(unsafe.Pointer(profList)))
-	// }
-
+		// release profList memory
+		win32.ProcWlanFreeMemory.Call(uintptr(unsafe.Pointer(profList)))
+	}
 }

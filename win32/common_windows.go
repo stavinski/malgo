@@ -15,8 +15,8 @@ const (
 	ERROR_SUCCESS = uintptr(0)
 
 	// WLAN values
-	WLAN_MAX_NAME_LENGTH           = 256
-	WLAN_PROFILE_GET_PLAINTEXT_KEY = 4
+	WLAN_MAX_NAME_LENGTH           = uint32(256)
+	WLAN_PROFILE_GET_PLAINTEXT_KEY = uint32(4)
 )
 
 var (
@@ -39,7 +39,7 @@ type GUID struct {
 
 type WLAN_PROFILE_INFO_LIST struct {
 	NumberOfItems, Index uint32
-	ProfileInfo          [128]WLAN_PROFILE_INFO
+	ProfileInfo          [1]WLAN_PROFILE_INFO
 }
 
 type WLAN_PROFILE_INFO struct {
@@ -55,9 +55,12 @@ type WLAN_INTERFACE_INFO struct {
 
 type WLAN_INTERFACE_INFO_LIST struct {
 	NumberOfItems, Index uint32
-	InterfaceInfo        *WLAN_INTERFACE_INFO
+	InterfaceInfo        [1]WLAN_INTERFACE_INFO
 }
 
+// Convert UTF pointer to a Go string
+//
+// Taken from windows package
 func UTF16PtrToString(p *uint16) string {
 	if p == nil {
 		return ""
