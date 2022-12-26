@@ -62,7 +62,7 @@ func main() {
 	}
 	// release interfaces memory at the end of the func
 	defer win32.ProcWlanFreeMemory.Call(uintptr(unsafe.Pointer(interfaces)))
-	ifaces := (*[1 << 30]win32.WLAN_INTERFACE_INFO)(unsafe.Pointer(&interfaces.InterfaceInfo[0]))[:interfaces.NumberOfItems:interfaces.NumberOfItems]
+	ifaces := unsafe.Slice(&interfaces.InterfaceInfo[0], interfaces.NumberOfItems)
 	// fmt.Printf("%v ifaces found.\n", interfaces.NumberOfItems)
 
 	for _, iface := range ifaces {
@@ -82,7 +82,7 @@ func main() {
 
 		fmt.Printf("[+] found %v profiles for current interface\n", profList.NumberOfItems)
 		fmt.Println("[+] retrieving WLAN profiles creds...")
-		profiles := (*[1 << 30]win32.WLAN_PROFILE_INFO)(unsafe.Pointer(&profList.ProfileInfo[0]))[:profList.NumberOfItems:profList.NumberOfItems]
+		profiles := unsafe.Slice(&profList.ProfileInfo[0], profList.NumberOfItems)
 		for _, profile := range profiles {
 			var profXMLPtr *uint16
 			var xmlData ProfileXML

@@ -14,21 +14,50 @@ const (
 	NULL          = uintptr(0)
 	ERROR_SUCCESS = uintptr(0)
 
-	// WLAN values
+	// Kernel32
+	PROCESS_CREATE_THREAD     = uint32(2)
+	PROCESS_QUERY_INFORMATION = uint32(0x0400)
+	PROCESS_VM_OPERATION      = uint32(8)
+	PROCESS_VM_READ           = uint32(10)
+	PROCESS_VM_WRITE          = uint32(0x0020)
+	MEM_COMMIT                = uint32(0x00001000)
+	MEM_RESERVE               = uint32(0x00002000)
+	MEM_RELEASE               = uint32(0x00008000)
+	PAGE_EXECUTE_READWRITE    = uint32(0x40)
+	PAGE_EXECUTE              = uint32(10)
+	PAGE_EXECUTE_READ         = uint32(0x20)
+	PAGE_READWRITE            = uint32(4)
+	INFINITE                  = uint32(0xFFFFFFFF)
+	THREAD_CREATE_SUSPENDED   = uint32(4)
+
+	// WLAN
 	WLAN_MAX_NAME_LENGTH           = uint32(256)
 	WLAN_PROFILE_GET_PLAINTEXT_KEY = uint32(4)
 )
 
 var (
-	modWlanapi = syscall.NewLazyDLL("Wlanapi.dll")
+	modWlanapi  = syscall.NewLazyDLL("Wlanapi.dll")
+	modKernel32 = syscall.NewLazyDLL("kernel32.dll")
 
-	// TODO: make these internal and expose a proper func for each
+	// WLAN
 	ProcWlanOpenHandle     = modWlanapi.NewProc("WlanOpenHandle")
 	ProcWlanCloseHandle    = modWlanapi.NewProc("WlanCloseHandle")
 	ProcWlanEnumInterfaces = modWlanapi.NewProc("WlanEnumInterfaces")
 	ProcWlanFreeMemory     = modWlanapi.NewProc("WlanFreeMemory")
 	ProcWlanGetProfileList = modWlanapi.NewProc("WlanGetProfileList")
 	ProcWlanGetProfile     = modWlanapi.NewProc("WlanGetProfile")
+
+	// Kernel32
+	ProcOpenProcess          = modKernel32.NewProc("OpenProcess")
+	ProcCloseHandle          = modKernel32.NewProc("CloseHandle")
+	ProcVirtualProtect       = modKernel32.NewProc("VirtualProtect")
+	ProcVirtualAllocEx       = modKernel32.NewProc("VirtualAllocEx")
+	ProcWriteProcessMemory   = modKernel32.NewProc("WriteProcessMemory")
+	ProcCreateRemoteThreadEx = modKernel32.NewProc("CreateRemoteThreadEx")
+	ProcResumeThread         = modKernel32.NewProc("ResumeThread")
+	ProcLoadLibraryA         = modKernel32.NewProc("LoadLibraryA")
+	ProcVirtualFreeEx        = modKernel32.NewProc("VirtualFreeEx")
+	ProcWaitForSingleObject  = modKernel32.NewProc("WaitForSingleObject")
 )
 
 type GUID struct {
