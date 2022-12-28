@@ -33,3 +33,11 @@ client -tls -port 4444 <host>
 ~~~
 tlsserver -port 4444 <cert> <key>
 ~~~
+
+## proxy
+
+Simple TCP proxy
+
+~~~
+proxy <port> <host:port>
+~~~
