@@ -1,5 +1,11 @@
 # Mal(icous)Go
 
+## Disclaimer
+
+Should only be used for systems that you have explicit permission to target, I take no responsibility for actions performed using any code from this repository.
+
+Use at your own risk! 
+
 ## wifi pwds
 
 Retrieve WLAN passwords from Windows. Uses native calls in Win32 API rather than executing `netsh wlan ...` as a command, this approach is more stealthy!
