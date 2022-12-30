@@ -1,6 +1,4 @@
-# malgo
-
-Does what it say's on the tin...Malicious Go! 
+# Mal(icous)Go
 
 ## wifi pwds
 
