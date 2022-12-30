@@ -41,3 +41,7 @@ Simple TCP proxy
 ~~~
 proxy <port> <host:port>
 ~~~
+
+## persistence
+
+A PoC to test adding a scheduled task into windows via COM/OLE rather than the noisey approach of using `schtasks.exe`. Please adjust to your needs!

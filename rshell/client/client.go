@@ -57,7 +57,9 @@ func main() {
 			fmt.Fprintln(os.Stderr, "Could not add cert to pool")
 			return
 		}
-		config := &tls.Config{RootCAs: roots}
+		// Enable below to verify server connection is legit
+		// config := &tls.Config{RootCAs: roots}
+		config := &tls.Config{InsecureSkipVerify: true}
 		conn, err := tls.Dial("tcp", fmt.Sprintf("%v:%v", host, port), config)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
