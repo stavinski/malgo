@@ -76,5 +76,5 @@ func main() {
 	taskDispatch := task.ToIDispatch()
 	defer taskDispatch.Release()
 	name := oleutil.MustGetProperty(taskDispatch, "Name")
-	fmt.Printf("[+] created new task: %v", name.ToString())
+	fmt.Printf("[+] created new task: %v\n", name.ToString())
 }

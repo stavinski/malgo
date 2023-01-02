@@ -11,7 +11,7 @@ import (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: %v [-port|-p] <cert> <key>", os.Args[0])
+	fmt.Fprintf(os.Stderr, "usage: %v [-port|-p] <cert> <key>\n", os.Args[0])
 	os.Exit(1)
 }
 

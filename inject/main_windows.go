@@ -15,7 +15,7 @@ import (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: %v <dll_path> <pid>", os.Args[0])
+	fmt.Fprintf(os.Stderr, "usage: %v <dll_path> <pid>\n", os.Args[0])
 	os.Exit(1)
 }
 
@@ -39,7 +39,7 @@ func main() {
 	}
 	dllPath = os.Args[1]
 	if _, err := os.Stat(dllPath); err != nil {
-		fmt.Fprintf(os.Stderr, "DLL '%v' path is invalid.", dllPath)
+		fmt.Fprintf(os.Stderr, "DLL '%v' path is invalid.\n", dllPath)
 		usage()
 	}
 	pid, err := strconv.ParseUint(os.Args[2], 10, 32)
