@@ -49,3 +49,7 @@ proxy <port> <host:port>
 ## persistence
 
 A PoC to test adding a scheduled task into windows via COM/OLE rather than the noisey approach of using `schtasks.exe`. Please adjust to your needs!
+
+## iat
+
+Demonstrates Go being used to perform IAT hooking at runtime via an injected DLL. This example actually does not perform anything malicious but could the technique could definitely be used for this purpose!
