@@ -52,4 +52,4 @@ A PoC to test adding a scheduled task into windows via COM/OLE rather than the n
 
 ## iat
 
-Demonstrates Go being used to perform IAT hooking at runtime via an injected DLL. This example actually does not perform anything malicious but could the technique could definitely be used for this purpose!
+Demonstrates Go being used to perform IAT hooking at runtime via an injected DLL. This example actually does not perform anything malicious but the technique could definitely be used for this purpose!
