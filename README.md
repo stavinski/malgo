@@ -50,6 +50,8 @@ proxy <port> <host:port>
 
 A PoC to test adding a scheduled task into windows via COM/OLE rather than the noisey approach of using `schtasks.exe`. Please adjust to your needs!
 
-## iat
+## hideproc
 
-Demonstrates Go being used to perform IAT hooking at runtime via an injected DLL. This example actually does not perform anything malicious but the technique could definitely be used for this purpose!
+Uses IAT hooking to hook into the low level `NtQuerySystemInformation` function import from `ntdll.dll` and hide processes based on an image name. Also includes a test executable to test against. Simply inject the DLL into the process you want to hide processes from.
+
+Code could be adjusted to perform other tasks.

