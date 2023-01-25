@@ -54,6 +54,6 @@ A PoC to test adding a scheduled task into windows via COM/OLE rather than the n
 
 Uses IAT hooking to hook into the low level `NtQuerySystemInformation` function import from `ntdll.dll` and hide processes based on an image name. Also includes a test executable to test against. Simply inject the DLL into the process you want to hide processes from.
 
-Also demonstrates being able to read the PE including the IAT entries in-memory, note this goes beyond what the `debug/pe` module does.
+Also demonstrates being able to read the PE including the IAT entries in-memory.
 
 Code could be adjusted to perform other tasks.
