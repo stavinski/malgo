@@ -57,3 +57,9 @@ Uses IAT hooking to hook into the low level `NtQuerySystemInformation` function 
 Also demonstrates being able to read the PE including the IAT entries in-memory.
 
 Code could be adjusted to perform other tasks.
+
+# imdsdump
+
+Find yourself on an EC2 instance with an assigned role?! This will use the IMDS to retrieve the temporary creds. Useful if the EC2 host is locked down making it tricky to call the service using other methods.
+
+Compiles to an exe however the code could be changed and compiled as a DLL to be used in-memory to be more stealty or when app blocking is in place.
