@@ -58,7 +58,7 @@ Also demonstrates being able to read the PE including the IAT entries in-memory.
 
 Code could be adjusted to perform other tasks.
 
-# imdsdump
+## imdsdump
 
 Find yourself on an EC2 instance with an assigned role?! This will use the IMDS to retrieve the temporary creds. Useful if the EC2 host is locked down making it tricky to call the service using other methods.
 
