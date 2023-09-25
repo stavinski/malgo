@@ -30,7 +30,24 @@ type SYSTEM_PROCESS_INFORMATION struct {
 	ProcessId, InheritedFromProcessId uintptr
 }
 
+type TOKEN_PRIVILEGES struct {
+	PrivilegeCount uint32
+	Privileges     [1]LUID_AND_ATTRIBUTES
+}
+
+type LUID_AND_ATTRIBUTES struct {
+	Luid       LUID
+	Attributes uint32
+}
+
+type LUID struct {
+	LowPart  uint32
+	HighPart int32
+}
+
 const (
+	TRUE          = uintptr(1)
+	FALSE         = uintptr(0)
 	NULL          = uintptr(0)
 	ERROR_SUCCESS = uintptr(0)
 
@@ -62,6 +79,15 @@ const (
 	SystemLookasideInformation            = 45
 	SystemCodeIntegrityInformation        = 103
 	SystemPolicyInformation               = 134
+
+	// advapi32
+	SE_BACKUP_NAME          = "SeBackupPrivilege"
+	SE_PRIVILEGE_ENABLED    = uint32(2)
+	TOKEN_ADJUST_PRIVILEGES = uint32(0x00000020)
+	TOKEN_QUERY             = uint32(0x00000008)
+	REG_STANDARD_FORMAT     = uint32(1)
+	REG_LATEST_FORMAT       = uint32(2)
+	REG_NO_COMPRESSION      = uint32(4)
 )
 
 var (
@@ -88,6 +114,12 @@ var (
 	modUser32       = syscall.NewLazyDLL("user32.dll")
 	ProcMessageBoxA = modUser32.NewProc("MessageBoxA")
 	ProcMessageBoxW = modUser32.NewProc("MessageBoxW")
+
+	// advapi32
+	modAdvapi32               = syscall.NewLazyDLL("advapi32.dll")
+	ProcAdjustTokenPrivileges = modAdvapi32.NewProc("AdjustTokenPrivileges")
+	ProcLookupPrivilegeValueA = modAdvapi32.NewProc("LookupPrivilegeValueA")
+	ProcOpenProcessToken      = modAdvapi32.NewProc("OpenProcessToken")
 )
 
 // Convert UTF pointer to a Go string
